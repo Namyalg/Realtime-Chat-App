@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>Chat</title>
+    <style>
+	form {
+                    position: fixed;
+                    /*align: center;*/
+                    left: 0;
+                    bottom:0;
+                    width: 90%;
+                    display: flex;
+                    box-sizing: border-box;
+                    padding: 0.35rem;
+                    margin-bottom : 25px;
+                    
+                }
+
+                form input {
+                    border: 1px solid black;
+                    padding: 0.5rem;
+                    width: 90%;
+                    outline: 0;
+                    margin-left: 130px;
+                    border-radius: 0.35rem;
+                    background: #fff;
+                    height: 40px;
+                    font-size: 20px;
+                }
+
+                form button {
+                    width: 6rem;
+                    background-color: #00008B;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem;
+                    margin-left: 10px;
+                    cursor: pointer;
+                    border-radius: 0.25rem;
+                    text-transform: uppercase;
+                }
+
+                #msg {
+                    margin: 0;
+                    padding: 0;
+                    width: 100%;
+                    align: center;
+                    max-height: 83.5vh;
+                    font-size : 20px;
+                    margin-bottom: 5rem;
+                    overflow-y : scroll;
+
+                    }
+                   #msg ol #who {
+                        padding-left: 30px;
+                        padding-right: 30px;
+                        padding-top: 10px;
+                        padding-bottom: 10px;
+                        margin-top: 15px;
+                        margin-left: 95px;
+                        border: 1px solid black;
+                        margin-right:95px;
+                        /*background: #eee;*/
+                        background: #f7ffd1;
+                        border-radius: 5px;
+                    
+                }
+
+                #name {
+                    font-size: 22px;
+                }
+                   #msg ol #what {
+                        padding-left: 90px;
+                        padding-right: 30px;
+                        padding-top: 10px;
+                        padding-bottom: 10px;
+                        border: 1px solid black;
+                        margin-top: 15px;
+                        margin-left: 95px;
+                        margin-right:95px;
+                        background: #ADD8E6;
+                       border-radius: 5px;
+                       text-align: right;
+                }
+
+    </style>
+    </head>
+    <body>
+        <form>
+            <input type="text" id="mess" autocomplete="off">
+            <button id="rest">Send</button>
+        </form>
+        <div id="msgs">
+        <ul id="msg"></ul>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+        <script>
+
+            var ppl = []
+            const form = document.querySelector("form");
+            const input = document.getElementById("mess");
+            const messages = document.getElementById("msg");
+            const socket = io();
+            const querystring = window.location.search;
+            console.log(querystring);
+
+            const urlParams = new URLSearchParams(querystring);
+            const name = urlParams.get("name");
+            const room = urlParams.get("key");
+            var roomId = room;
+            var user = name;
+
+            socket.emit('create', roomId);
+            function scroll() {
+                let me = document.querySelector("#msg").lastElementChild;
+                me.scrollIntoView();
+                
+            }
+            form.addEventListener("submit", function(event) {
+                event.preventDefault();
+                addMessage("<ol id='what'>" +"<b id='name'>" + user + "</b>" +"<br>" + input.value+"</ol>");
+                socket.emit("chat_message" , {
+                    username : user,
+                    message: input.value
+                });
+                ppl.push(user);
+                console.log(ppl);
+                input.value = "";
+                return false;
+            }, false);
+
+            socket.on("chat_message", function(data) {
+                console.log(data.username);
+                console.log(data.message);
+                addMessage(data);
+            });
+
+            var objDiv = document.getElementById("msg");
+            
+            function addMessage(message) {
+                const line = "<hr>";
+                const li = document.createElement("ol");
+                li.innerHTML = message;
+                messages.appendChild(li);
+                objDiv.scrollTop = objDiv.scrollHeight;
+               
+                
+            }
+        </script>
+    </body>
+</html>
+
+
+
